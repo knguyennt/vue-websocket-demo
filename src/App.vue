@@ -1,26 +1,42 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <div>
+      <h1>WebSocket Demo</h1>
+      <input type="text" v-model="message" />
+      <button @click="sendMessage">Send Message</button>
+      <ul>
+        <li v-for="msg in messages" :key="msg">{{ msg }}</li>
+      </ul>
+    </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import { io } from "socket.io-client";
 
 export default {
-  name: 'App',
-  components: {
-    HelloWorld
-  }
-}
-</script>
+  data() {
+    return {
+      message: "",
+      messages: [],
+    };
+  },
+  mounted() {
+    const socket = io("http://localhost:3000");
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style>
+    socket.on("connect", () => {
+      console.log("Connected to server");
+    });
+
+    socket.on("message", (data) => {
+      console.log(data);
+      this.messages.push(data);
+    });
+  },
+  methods: {
+    sendMessage() {
+      const socket = io("http://localhost:3000");
+      socket.emit("message", this.message);
+      this.message = "";
+    },
+  },
+};
+</script>
